@@ -1,5 +1,5 @@
 # Stage 1: 빌드 단계 (Gradle과 Java 21 환경)
-FROM gradle:8.2-jdk21 AS builder
+FROM eclipse-temurin:21-jdk
 WORKDIR /home/gradle/project
 # 프로젝트 소스 전체를 복사 (소유권은 gradle 사용자로 설정)
 COPY --chown=gradle:gradle .github .
