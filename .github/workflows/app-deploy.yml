@@ -33,20 +33,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Deploy to Server using SSH ID/Password
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/my-app:${{ github.sha }}
-        run: |
-          # sshpass 설치
-          sudo apt-get update && sudo apt-get install -y sshpass
-          
-          # sshpass를 이용해 SSH 접속 및 명령 실행
-          sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} << 'EOF'
-            docker pull ${DOCKER_IMAGE}
+      - name: Deploy to Server using SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/my-app:${{ github.sha }}
             docker stop my-app || true
             docker rm my-app || true
-            docker run -d --name my-app -p 8080:8080 ${DOCKER_IMAGE}
-  EOF
+            docker run -d --name my-app -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/my-app:${{ github.sha }}
